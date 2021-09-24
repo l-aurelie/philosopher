@@ -114,6 +114,18 @@ long 	get_time(t_info *info)
 	return (time_sec);
 }
 
+int		mutex_fork(int lock, t_phil *phil, int i)
+{
+	if (lock)
+	{
+
+	}
+	else
+	{
+	
+	}
+}
+
 int		take_drop_fork(int take, t_phil *phil)
 {
 	printf("FORK\n");
@@ -122,6 +134,7 @@ int		take_drop_fork(int take, t_phil *phil)
 	i = phil->index;
 	if(take)
 	{
+		mutex_fork(take, phil, i);
 		pthread_mutex_lock(&phil->info->fork[i]);
 		printf("%ld %d has taken a fork\n", get_time(phil->info), i);
 		if (i != phil->info->nb_philo - 1)
@@ -151,7 +164,46 @@ int		take_drop_fork(int take, t_phil *phil)
 		}
 	}
 }
+/*
+int		take_drop_fork(int take, t_phil *phil)
+{
+	printf("FORK\n");
+	int i;
 
+	i = phil->index;
+	if(take)
+	{
+		mutex_fork(take, phil, i)
+		pthread_mutex_lock(&phil->info->fork[i]);
+		printf("%ld %d has taken a fork\n", get_time(phil->info), i);
+		if (i != phil->info->nb_philo - 1)
+		{
+			pthread_mutex_lock(&phil->info->fork[i + 1]);
+			printf("%ld %d has taken a fork right\n", get_time(phil->info), i);
+		}
+		else
+		{
+			pthread_mutex_lock(&phil->info->fork[0]);	
+			printf("%ld %d has taken a fork right\n", get_time(phil->info), i);
+		}
+	}
+	else
+	{
+		pthread_mutex_unlock(&phil->info->fork[i]);
+		printf("%d has drop fork\n", i);
+		if (i != phil->info->nb_philo - 1)
+		{
+			pthread_mutex_unlock(&phil->info->fork[i + 1]);
+			printf("%d has drop fork right\n", i);
+		}
+		else
+		{
+			pthread_mutex_unlock(&phil->info->fork[0]);
+			printf("%d has drop fork right\n", i);
+		}
+	}
+}
+*/
 void	 *routine(void *ptr)
 {
 	printf("ROUTINE\n");
@@ -349,3 +401,17 @@ int 	main(int argc, char **argv)
 		printf("wrong number of arguments\n");
 	return(0);
 }
+
+/*philo avec une seule fork
+at least nb de repas
+decouper les usleep
+0 philo
+1philo
+limiter a 200 philo
+ne rien ecrire apres la mort
+race condition , fsanitize=thread
+
+dans chaque philo tu peux mettre : usleep ( time_to_eat * (id % 2) / 2) juste apres les avoir lancé
+
+vue qu'ils sont legerement lancer en decaler, ils vont essayer de prendre une puis deux fourchette et ensuite essayer de manger si ils ont deux fourchettes , mais si ils n'ont pas 2 fourchettes tu libre la fourchettes qu'il a
+*/
