@@ -83,7 +83,6 @@ int		exit_philo(t_info *info, t_phil **phil, int failure)
 
 long 	get_time(t_info *info)
 {
-	//printf("GETTIME\n");
 	int i;
 	long time_sec;
 	long time_msec;
@@ -93,24 +92,22 @@ long 	get_time(t_info *info)
 	if (gettimeofday(&info->time, NULL))
 		return (0);
 	time_sec = info->time.tv_sec - info->start.tv_sec;
-	printf("sec => %lu - %lu = %lu\n", info->time.tv_sec, info->start.tv_sec, time_sec);
-	//printf("start = %lu, time sec = %lu, res = %lu\n",info->start, info->time.tv_sec, time_res);
+	//printf("sec => %ld - %ld = %ld\n", info->time.tv_sec, info->start.tv_sec, time_sec);
 	time_msec = info->time.tv_usec / 1000 - info->start.tv_usec / 1000;
-	printf("msec => %lu - %lu = %lu\n", info->time.tv_usec / 1000, info->start.tv_usec /1000, time_msec);
+	//printf("msec => %d - %d = %ld\n", info->time.tv_usec / 1000, info->start.tv_usec /1000, time_msec);
 	if (time_msec < 0)
 	{
 		time_msec += 1000;
 		time_sec -= 1;
 	}
 	tmp = time_msec;
-	printf("tmp = %ld\n", tmp);
 	while (tmp > 0)
 	{
 		tmp /= 10;
 		i++;		
 	}
 	time_sec = (time_sec * (i * 10)) + time_msec;
-	printf("GET TIME = %ld\n", time_sec);
+	//printf("GET TIME = %ld\n", time_sec);
 	return (time_sec);
 }
 
@@ -128,7 +125,6 @@ int		mutex_fork(int lock, t_phil *phil, int i)
 
 int		take_drop_fork(int take, t_phil *phil)
 {
-	printf("FORK\n");
 	int i;
 
 	i = phil->index;
@@ -163,6 +159,7 @@ int		take_drop_fork(int take, t_phil *phil)
 			printf("%d has drop fork right\n", i);
 		}
 	}
+	return (0);
 }
 /*
 int		take_drop_fork(int take, t_phil *phil)
@@ -213,6 +210,8 @@ void	 *routine(void *ptr)
 	while (phil->count_eat < phil->info->nb_eat && !phil->info->tue_la_mif_frere)
 	{
 		if(!phil->info->tue_la_mif_frere)
+			printf("%ld %d is thinking\n", get_time(phil->info), i);
+		if(!phil->info->tue_la_mif_frere)
 			take_drop_fork(1, phil);
 		if(!phil->info->tue_la_mif_frere)
 		{
@@ -227,12 +226,11 @@ void	 *routine(void *ptr)
 			printf("%ld %d is sleeping\n", get_time(phil->info), i);
 			usleep(phil->info->time_sleep * 1000);
 		}
-		if(!phil->info->tue_la_mif_frere)
-			printf("%ld %d is thinking\n", get_time(phil->info), i);
 		printf("HERE %d\n", i);
 	}
 	printf("LEAVING routine %d\n", i);
 	phil->finish = 1;
+	return (0);
 }
 
 int check_data(char *argv, int index)
@@ -240,25 +238,18 @@ int check_data(char *argv, int index)
 	int i;
 
 	i = 0;
-	if (index != 5)
+	while(argv[i])
 	{
-		while(argv[i])
-		{
-			if (!ft_isdigit(argv[i]))
-				return (0);
-			i++;
-		}
-		return (1);
-	}
-	else
-	{
-		if (argv[0] != '[' || argv[ft_strlen(argv) - 1] != ']')
+		if (!ft_isdigit(argv[i]))
 			return (0);
-		while (++i < ft_strlen(argv) - 1)
-			if (!ft_isdigit(argv[i]))
-				return (0);
-		return (1);
+		i++;
+		if (i > 10)
+		{
+			printf("enter an integer please\n");
+			return (0);
+		}
 	}
+	return (1);
 }
 
 int		init(t_info *info, t_phil **phil)
@@ -316,11 +307,10 @@ int		destroy(t_info *info, t_phil **phil)
 
 int		parse(t_info *info, char **argv)
 {
-	printf("PARSE\n");
 	int i;
 
 	i = 1;
-	while (i < 6 )
+	while (argv[i])
 	{
 		if (!check_data(argv[i], i))
 		{
@@ -333,13 +323,13 @@ int		parse(t_info *info, char **argv)
 	info->time_die = ft_atoi(argv[2]);	
 	info->time_eat = ft_atoi(argv[3]);	
 	info->time_sleep = ft_atoi(argv[4]);	
-	info->nb_eat = ft_atoi(argv[5] + 1);
+	if (i == 5)
+		info->nb_eat = ft_atoi(argv[5]);
 	return(0);
 }
 
 int		checker(t_info *info, t_phil **phil)
 {
-	printf("CHECKER\n");
 	int i;
 	int finish;
 
@@ -350,10 +340,11 @@ int		checker(t_info *info, t_phil **phil)
 		if((*phil)[i].finish == 0)
 			finish = 0;
 		
-		printf("=====time %d (%ld - %ld)= %ld\n", i,get_time(info), (*phil)[i].last_eat, get_time(info) - (*phil)[i].last_eat);
+	//	printf("%d (%ld - %ld)= %ld\n", i,get_time(info), (*phil)[i].last_eat, get_time(info) - (*phil)[i].last_eat);
 		if(get_time(info) - (*phil)[i].last_eat >= info->time_die)
 		{
-			printf("=====%ld %d DIED\n", get_time(info), i);
+	//	printf("%d (%ld - %ld)= %ld\n", i,get_time(info), (*phil)[i].last_eat, get_time(info) - (*phil)[i].last_eat);
+			printf("======%ldms %d DIED\n", get_time(info), i);
 			exit_philo(info, phil, 0);
 		}
 		i++;
@@ -390,7 +381,7 @@ int 	main(int argc, char **argv)
 	t_info info;
 	t_phil *phil;
 	
-	if (argc == 6)
+	if (argc == 6 || argc == 5)
 	{
 		parse(&info, argv);
 		init(&info, &phil);
