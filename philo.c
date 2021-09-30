@@ -52,7 +52,9 @@ typedef struct	s_info
 	int time_sleep;
 	int nb_eat;
 	pthread_mutex_t *fork;
-	int tue_la_mif_frere;
+	pthread_mutex_t print_turn;
+	pthread_mutex_t check_off;
+	int turn_off;
 	struct timeval time;
 	struct timeval start;
 }				t_info;
@@ -64,16 +66,65 @@ typedef struct	s_phil
 	int count_eat;
 	long last_eat;
 	int finish;
+	pthread_mutex_t check_meal;
 	t_info *info;
 }				t_phil;
 
 int		destroy(t_info *info, t_phil **phil);
+long 	get_time(t_info *info);
+
+int		check_turn_off(t_info *info)
+{
+		pthread_mutex_lock(&info->check_off);
+		if (info->turn_off)
+		{
+			pthread_mutex_unlock(&info->check_off);
+			return (1);
+		}
+		pthread_mutex_unlock(&info->check_off);
+	return (0);
+}
+
+int		ft_usleep(int time_to_sleep, t_info *info)
+{
+	long start;
+	
+	start = get_time(info);
+	while (get_time(info) - start < time_to_sleep && !check_turn_off(info))
+	{
+		usleep(100);
+		if(check_turn_off(info) && get_time(info) - start < time_to_sleep )//DEBUG
+			return 1;
+	}
+	return (0);
+}
+
+int		print_state(char *state, t_phil *phil, t_info *info)
+{
+	usleep(100);
+	if (!check_turn_off(info))
+	{	
+		pthread_mutex_lock(&info->print_turn);
+		printf("%ld %d %s", get_time(info), phil->index, state);
+		pthread_mutex_unlock(&info->print_turn);
+	}
+/*	else
+	{	
+		pthread_mutex_lock(&info->print_turn);
+		printf("(%ld %d %s)", get_time(info), phil->index, state);
+		pthread_mutex_unlock(&info->print_turn);
+	}*/
+	return (0);
+}
 
 int		exit_philo(t_info *info, t_phil **phil, int failure)
 {
 	printf("EXIT TA MERE\n");
 	//free;
-	info->tue_la_mif_frere = 1;
+
+	pthread_mutex_lock(&info->check_off);
+	info->turn_off = 1;
+	pthread_mutex_unlock(&info->check_off);
 	destroy(info, phil);
 	if (failure)
 		exit(1);
@@ -115,11 +166,20 @@ int		mutex_fork(int lock, t_phil *phil, int i)
 {
 	if (lock)
 	{
-
+		pthread_mutex_lock(&phil->info->fork[i]);
+		if (i != phil->index)
+			print_state("has taken a fork right\n", phil, phil->info);
+		else
+			print_state("has taken a fork\n", phil, phil->info);
 	}
 	else
 	{
-	
+		pthread_mutex_unlock(&phil->info->fork[i]);
+		if (i != phil->index)//DEBUG
+			print_state("has drop a fork right\n", phil, phil->info);
+		else
+			print_state("has drop a fork\n", phil, phil->info);
+		return(0);
 	}
 }
 
@@ -128,108 +188,52 @@ int		take_drop_fork(int take, t_phil *phil)
 	int i;
 
 	i = phil->index;
-	if(take)
-	{
-		mutex_fork(take, phil, i);
-		pthread_mutex_lock(&phil->info->fork[i]);
-		printf("%ld %d has taken a fork\n", get_time(phil->info), i);
-		if (i != phil->info->nb_philo - 1)
-		{
-			pthread_mutex_lock(&phil->info->fork[i + 1]);
-			printf("%ld %d has taken a fork right\n", get_time(phil->info), i);
-		}
-		else
-		{
-			pthread_mutex_lock(&phil->info->fork[0]);	
-			printf("%ld %d has taken a fork right\n", get_time(phil->info), i);
-		}
-	}
+	mutex_fork(take, phil, i);
+	if (i != phil->info->nb_philo - 1)
+		mutex_fork(take, phil, i + 1);
 	else
-	{
-		pthread_mutex_unlock(&phil->info->fork[i]);
-		printf("%d has drop fork\n", i);
-		if (i != phil->info->nb_philo - 1)
-		{
-			pthread_mutex_unlock(&phil->info->fork[i + 1]);
-			printf("%d has drop fork right\n", i);
-		}
-		else
-		{
-			pthread_mutex_unlock(&phil->info->fork[0]);
-			printf("%d has drop fork right\n", i);
-		}
-	}
+		mutex_fork(take, phil, 0);
 	return (0);
 }
-/*
-int		take_drop_fork(int take, t_phil *phil)
-{
-	printf("FORK\n");
-	int i;
 
-	i = phil->index;
-	if(take)
-	{
-		mutex_fork(take, phil, i)
-		pthread_mutex_lock(&phil->info->fork[i]);
-		printf("%ld %d has taken a fork\n", get_time(phil->info), i);
-		if (i != phil->info->nb_philo - 1)
-		{
-			pthread_mutex_lock(&phil->info->fork[i + 1]);
-			printf("%ld %d has taken a fork right\n", get_time(phil->info), i);
-		}
-		else
-		{
-			pthread_mutex_lock(&phil->info->fork[0]);	
-			printf("%ld %d has taken a fork right\n", get_time(phil->info), i);
-		}
-	}
-	else
-	{
-		pthread_mutex_unlock(&phil->info->fork[i]);
-		printf("%d has drop fork\n", i);
-		if (i != phil->info->nb_philo - 1)
-		{
-			pthread_mutex_unlock(&phil->info->fork[i + 1]);
-			printf("%d has drop fork right\n", i);
-		}
-		else
-		{
-			pthread_mutex_unlock(&phil->info->fork[0]);
-			printf("%d has drop fork right\n", i);
-		}
-	}
-}
-*/
 void	 *routine(void *ptr)
 {
-	printf("ROUTINE\n");
 	t_phil *phil = ptr;
 	int i;
 	i =  phil->index;
-	while (phil->count_eat < phil->info->nb_eat && !phil->info->tue_la_mif_frere)
+	if (i % 2 != 0)
+		usleep(100);
+	while (!check_turn_off(phil->info) && phil->info->nb_eat != 0)
 	{
-		if(!phil->info->tue_la_mif_frere)
-			printf("%ld %d is thinking\n", get_time(phil->info), i);
-		if(!phil->info->tue_la_mif_frere)
+			printf("%ld ROUTINE %d (%d)\n",get_time(phil->info), i, phil->count_eat);
+		//if(!check_turn_off(phil->info))
+		print_state("is thinking\n", phil, phil->info);
+		if(!check_turn_off(phil->info))
+		{
 			take_drop_fork(1, phil);
-		if(!phil->info->tue_la_mif_frere)
-		{
 			phil->last_eat = get_time(phil->info);
-			printf("%ld %d is eating\n",get_time(phil->info), i);
-			usleep(phil->info->time_eat * 1000);
+			print_state("=====is eating\n", phil, phil->info);
+			ft_usleep(phil->info->time_eat /** 1000*/, phil->info);
+			//if(ft_usleep(phil->info->time_eat /** 1000*/, phil->info))
+			//	printf("%ld %d AWAKE from eat\n", get_time(phil->info), i);//DEBUG
 			phil->count_eat++;
-		}
+			if (phil->count_eat == phil->info->nb_eat)
+			{
+				printf("%ld %d -----has finish\n", get_time(phil->info), i);
+				phil->finish = 1;
+				usleep(20);	
+			}
 			take_drop_fork(0, phil);
-		if(!phil->info->tue_la_mif_frere)
-		{
-			printf("%ld %d is sleeping\n", get_time(phil->info), i);
-			usleep(phil->info->time_sleep * 1000);
 		}
-		printf("HERE %d\n", i);
+		//if(!check_turn_off(phil->info))
+		//{
+			print_state("is sleeping\n", phil, phil->info);
+			ft_usleep(phil->info->time_sleep /** 1000*/, phil->info);
+			//if (ft_usleep(phil->info->time_sleep /** 1000*/, phil->info))
+			//	printf("%ld %dAWAKE from sleep\n", get_time(phil->info), i);//DEBUG
+		//}
 	}
-	printf("LEAVING routine %d\n", i);
-	phil->finish = 1;
+	printf("LEAVING routine %d (%d)\n", i, phil->count_eat);
 	return (0);
 }
 
@@ -260,8 +264,7 @@ int		init(t_info *info, t_phil **phil)
 	i = 0;
 	*phil = malloc(sizeof(t_phil) * info->nb_philo);
 	info->fork = malloc(sizeof(pthread_mutex_t) * info->nb_philo);
-	info->tue_la_mif_frere = 0;
-	gettimeofday(&info->start, NULL);
+	info->turn_off = 0;
 	while (i < info->nb_philo)
 	{
 		pthread_mutex_init(&info->fork[i], NULL);
@@ -323,8 +326,10 @@ int		parse(t_info *info, char **argv)
 	info->time_die = ft_atoi(argv[2]);	
 	info->time_eat = ft_atoi(argv[3]);	
 	info->time_sleep = ft_atoi(argv[4]);	
-	if (i == 5)
+	if (argv[5])
 		info->nb_eat = ft_atoi(argv[5]);
+	else 
+		info->nb_eat = -1;
 	return(0);
 }
 
@@ -344,14 +349,14 @@ int		checker(t_info *info, t_phil **phil)
 		if(get_time(info) - (*phil)[i].last_eat >= info->time_die)
 		{
 	//	printf("%d (%ld - %ld)= %ld\n", i,get_time(info), (*phil)[i].last_eat, get_time(info) - (*phil)[i].last_eat);
-			printf("======%ldms %d DIED\n", get_time(info), i);
+			printf("======%ldms %d DIED (last_eat -> %ld)\n", get_time(info), i, (*phil)[i].last_eat);
 			exit_philo(info, phil, 0);
 		}
 		i++;
 	}
 	if (finish)
 	{
-		printf("FINISH OPERATION\n");
+		printf("%ld FINISH OPERATION\n", get_time(info));
 		exit_philo(info, phil, 1);
 	}
 	return(0);
@@ -359,17 +364,20 @@ int		checker(t_info *info, t_phil **phil)
 
 int		philo(t_info *info, t_phil **phil)
 {
-	printf("PHILO\n");
 	int i;
 
 	i = 0;
+	gettimeofday(&info->start, NULL);
 	while (i < info->nb_philo)
 	{
+		if (!i % 2 == 0)
+			usleep(100); 
 		pthread_create(&(*phil)[i].philo, NULL, &routine,(void *)&(*phil)[i]);
 		i++;
 	}
 	while (1)
 	{
+		usleep(500);
 		checker(info, phil);
 	}
 	return (0);
