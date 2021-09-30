@@ -134,12 +134,9 @@ int		exit_philo(t_info *info, t_phil **phil, int failure)
 
 long 	get_time(t_info *info)
 {
-	int i;
 	long time_sec;
 	long time_msec;
-	long tmp;
-
-	i = 0;
+	
 	if (gettimeofday(&info->time, NULL))
 		return (0);
 	time_sec = info->time.tv_sec - info->start.tv_sec;
@@ -151,13 +148,7 @@ long 	get_time(t_info *info)
 		time_msec += 1000;
 		time_sec -= 1;
 	}
-	tmp = time_msec;
-	while (tmp > 0)
-	{
-		tmp /= 10;
-		i++;		
-	}
-	time_sec = (time_sec * (i * 10)) + time_msec;
+	time_sec = (time_sec * 1000) + time_msec;
 	//printf("GET TIME = %ld\n", time_sec);
 	return (time_sec);
 }
@@ -175,12 +166,13 @@ int		mutex_fork(int lock, t_phil *phil, int i)
 	else
 	{
 		pthread_mutex_unlock(&phil->info->fork[i]);
-		if (i != phil->index)//DEBUG
+		/*if (i != phil->index)//DEBUG
 			print_state("has drop a fork right\n", phil, phil->info);
 		else
-			print_state("has drop a fork\n", phil, phil->info);
+			print_state("has drop a fork\n", phil, phil->info);*/
 		return(0);
 	}
+	return (0);
 }
 
 int		take_drop_fork(int take, t_phil *phil)
