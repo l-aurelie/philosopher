@@ -119,7 +119,7 @@ int		print_state(char *state, t_phil *phil, t_info *info)
 
 int		exit_philo(t_info *info, t_phil **phil, int failure)
 {
-	printf("EXIT TA MERE\n");
+	//printf("EXIT TA MERE\n");
 	//free;
 
 	pthread_mutex_lock(&info->check_off);
@@ -205,7 +205,7 @@ void	 *routine(void *ptr)
 		usleep(100);
 	while (!check_turn_off(phil->info) && phil->info->nb_eat != 0)
 	{
-			printf("%ld ROUTINE %d (%d)\n",get_time(phil->info), i, phil->count_eat);
+		//	printf("%ld ROUTINE %d (%d)\n",get_time(phil->info), i, phil->count_eat);
 		//if(!check_turn_off(phil->info))
 		print_state("is thinking\n", phil, phil->info);
 		if(!check_turn_off(phil->info))
@@ -219,7 +219,7 @@ void	 *routine(void *ptr)
 			phil->count_eat++;
 			if (phil->count_eat == phil->info->nb_eat)
 			{
-				printf("%ld %d -----has finish\n", get_time(phil->info), i);
+				//printf("%ld %d -----has finish\n", get_time(phil->info), i);
 				phil->finish = 1;
 				usleep(20);	
 			}
@@ -233,7 +233,7 @@ void	 *routine(void *ptr)
 			//	printf("%ld %dAWAKE from sleep\n", get_time(phil->info), i);//DEBUG
 		//}
 	}
-	printf("LEAVING routine %d (%d)\n", i, phil->count_eat);
+	//printf("LEAVING routine %d (%d)\n", i, phil->count_eat);
 	return (0);
 }
 
@@ -258,7 +258,7 @@ int check_data(char *argv, int index)
 
 int		init(t_info *info, t_phil **phil)
 {
-	printf("INIT\n");
+	//printf("INIT\n");
 	int i;
 		
 	i = 0;
@@ -286,13 +286,13 @@ int		init(t_info *info, t_phil **phil)
 
 int		destroy(t_info *info, t_phil **phil)
 {
-	printf("DESTROY LA FAMILLE \n");
+	//printf("DESTROY LA FAMILLE \n");
 	int i;
 	
 	i = 0;
 	while (i < info->nb_philo)
 	{
-		printf("JOIN %d\n", i);
+	//	printf("JOIN %d\n", i);
 		pthread_join((*phil)[i].philo, NULL);
 		i++;
 	}
@@ -300,11 +300,11 @@ int		destroy(t_info *info, t_phil **phil)
 	i = 0;
 	while (i < info->nb_philo)
 	{
-		printf("MUTEX DESTROY %d\n", i);
+	//	printf("MUTEX DESTROY %d\n", i);
 		pthread_mutex_destroy(&info->fork[i]);
 		i++;
 	}
-	printf("LEAVE DESTROY\n");
+	//printf("LEAVE DESTROY\n");
 	return (0);
 }
 
@@ -356,7 +356,7 @@ int		checker(t_info *info, t_phil **phil)
 	}
 	if (finish)
 	{
-		printf("%ld FINISH OPERATION\n", get_time(info));
+		//printf("%ld FINISH OPERATION\n", get_time(info));
 		exit_philo(info, phil, 1);
 	}
 	return(0);
@@ -385,7 +385,7 @@ int		philo(t_info *info, t_phil **phil)
 
 int 	main(int argc, char **argv)
 {
-	printf("MAIN\n");
+	//printf("MAIN\n");
 	t_info info;
 	t_phil *phil;
 	
