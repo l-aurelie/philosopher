@@ -6,15 +6,15 @@
 /*   By: user42 <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/03 22:38:59 by user42            #+#    #+#             */
-/*   Updated: 2021/10/03 22:49:15 by user42           ###   ########.fr       */
+/*   Updated: 2021/10/03 23:45:29 by user42           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
 
-int	init_philo(t_info *info, t_phil **phil)
+void	init_philo(t_info *info, t_phil **phil)
 {
-	int i;
+	int	i;
 
 	i = 0;
 	while (i < info->nb_philo)
@@ -73,7 +73,7 @@ int	check_data(char *argv, int index)
 		}
 		if (index == 1 && i > 2)
 		{
-			printf("be gentle : no more than 200 philosopher can have dinner at the same time\n");
+			printf("please no more than 200 philosophers can have dinner\n");
 			return (0);
 		}
 		i++;
@@ -89,10 +89,7 @@ int	parse(t_info *info, char **argv)
 	while (argv[i])
 	{
 		if (!check_data(argv[i], i))
-		{
-			//printf("parsing error\n");
 			return (1);
-		}
 		i++;
 	}
 	info->nb_philo = ft_atoi(argv[1]);
@@ -113,14 +110,12 @@ int	exit_philo(t_phil **phil, t_info *info, int exit_val)
 	i = 0;
 	while (i < info->nb_philo)
 	{
-		//printf("JOIN %d\n", i);
 		pthread_join((*phil)[i].philo, NULL);
 		i++;
 	}
 	i = 0;
 	while (i < info->nb_philo)
 	{
-	//	printf("MUTEX DESTROY %d\n", i);
 		pthread_mutex_destroy(&info->fork[i]);
 		pthread_mutex_destroy(&(*phil)[i].check_meal);
 		i++;

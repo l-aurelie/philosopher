@@ -6,7 +6,7 @@
 /*   By: user42 <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/03 20:13:12 by user42            #+#    #+#             */
-/*   Updated: 2021/10/03 22:56:05 by user42           ###   ########.fr       */
+/*   Updated: 2021/10/03 23:57:26 by user42           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,12 +25,9 @@ int	checker(t_info *info, t_phil **phil)
 		if ((*phil)[i].finish == 0)
 			finish = 0;
 		pthread_mutex_unlock(&(*phil)[i].check_meal);
-	//	printf("%d (%ld - %ld)= %ld\n", i,get_time(info), (*phil)[i].last_eat, get_time(info) - (*phil)[i].last_eat);
 		pthread_mutex_lock(&(*phil)[i].check_meal);
 		if (get_time(info) - (*phil)[i].last_eat >= info->time_die)
 		{
-	//	printf("%d (%ld - %ld)= %ld\n", i,get_time(info), (*phil)[i].last_eat, get_time(info) - (*phil)[i].last_eat);
-		//	printf("======%ldms %d DIED (last_eat -> %ld)\n", get_time(info), i, (*phil)[i].last_eat);
 			print_state("died\n", *phil, info);
 			pthread_mutex_unlock(&(*phil)[i].check_meal);
 			return (1);
@@ -69,12 +66,11 @@ void	philo(t_info *info, t_phil **phil)
 	}
 }
 
-int 	main(int argc, char **argv)
+int	main(int argc, char **argv)
 {
-	//printf("MAIN\n");
-	t_info info;
-	t_phil *phil;
-	
+	t_info	info;
+	t_phil	*phil;
+
 	if (argc == 6 || argc == 5)
 	{
 		if (parse(&info, argv))
@@ -90,5 +86,5 @@ int 	main(int argc, char **argv)
 		printf("wrong number of arguments\n");
 		return (1);
 	}
-	return(0);
+	return (0);
 }

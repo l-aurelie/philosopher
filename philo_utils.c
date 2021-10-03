@@ -6,7 +6,7 @@
 /*   By: user42 <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/03 22:34:26 by user42            #+#    #+#             */
-/*   Updated: 2021/10/03 22:37:02 by user42           ###   ########.fr       */
+/*   Updated: 2021/10/03 23:43:58 by user42           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,8 +32,6 @@ int	ft_usleep(int time_to_sleep, t_info *info)
 	while (get_time(info) - start < time_to_sleep && !check_turn_off(info))
 	{
 		usleep(100);
-		if (check_turn_off(info) && get_time(info) - start < time_to_sleep )//DEBUG
-			return (1);
 	}
 	return (0);
 }
@@ -44,15 +42,9 @@ int	print_state(char *state, t_phil *phil, t_info *info)
 	if (!check_turn_off(info))
 	{	
 		pthread_mutex_lock(&info->print_turn);
-		printf("%ld %d %s", get_time(info), phil->index, state);
+		printf("%ld %d %s", get_time(info), phil->index + 1, state);
 		pthread_mutex_unlock(&info->print_turn);
 	}
-/*	else
-	{	
-		pthread_mutex_lock(&info->print_turn);
-		printf("(%ld %d %s)", get_time(info), phil->index, state);
-		pthread_mutex_unlock(&info->print_turn);
-	}*/
 	return (0);
 }
 
@@ -73,4 +65,3 @@ long	get_time(t_info *info)
 	time_sec = (time_sec * 1000) + time_msec;
 	return (time_sec);
 }
-
