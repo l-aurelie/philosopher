@@ -6,7 +6,7 @@
 /*   By: user42 <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/03 20:27:42 by user42            #+#    #+#             */
-/*   Updated: 2021/10/03 23:45:56 by user42           ###   ########.fr       */
+/*   Updated: 2021/10/04 00:39:49 by user42           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 #ifndef PHILO_H
@@ -56,7 +56,7 @@ int		ft_free(void **ptr);
 ** PHILO_UTILS
 */
 int		check_turn_off(t_info *info);
-int		ft_usleep(int time_to_sleep, t_info *info);
+void	ft_usleep(int time_to_sleep, t_info *info);
 int		print_state(char *state, t_phil *phil, t_info *info);
 long	get_time(t_info *info);
 
@@ -72,8 +72,8 @@ int		exit_philo(t_phil **phil, t_info *info, int exit_val);
 /*
 ** SIMULATION
 */
-int		mutex_fork(int lock, t_phil *phil, int i);
-int		take_drop_fork(int take, t_phil *phil);
+void	mutex_fork(int lock, t_phil *phil, int i);
+void	take_drop_fork(int take, t_phil *phil);
 void	eat(t_phil *phil);
 void	*routine(void *ptr);
 

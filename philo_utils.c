@@ -6,7 +6,7 @@
 /*   By: user42 <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/03 22:34:26 by user42            #+#    #+#             */
-/*   Updated: 2021/10/03 23:43:58 by user42           ###   ########.fr       */
+/*   Updated: 2021/10/04 01:05:17 by user42           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@ int	check_turn_off(t_info *info)
 	return (0);
 }
 
-int	ft_usleep(int time_to_sleep, t_info *info)
+void	ft_usleep(int time_to_sleep, t_info *info)
 {
 	long	start;
 
@@ -33,7 +33,6 @@ int	ft_usleep(int time_to_sleep, t_info *info)
 	{
 		usleep(100);
 	}
-	return (0);
 }
 
 int	print_state(char *state, t_phil *phil, t_info *info)

@@ -6,7 +6,7 @@
 /*   By: user42 <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/03 22:38:59 by user42            #+#    #+#             */
-/*   Updated: 2021/10/03 23:45:29 by user42           ###   ########.fr       */
+/*   Updated: 2021/10/04 00:38:24 by user42           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -121,6 +121,7 @@ int	exit_philo(t_phil **phil, t_info *info, int exit_val)
 		i++;
 	}
 	pthread_mutex_destroy(&info->check_off);
+	pthread_mutex_destroy(&info->print_turn);
 	ft_free((void **)&info->fork);
 	ft_free((void **)phil);
 	return (exit_val);

@@ -6,13 +6,13 @@
 /*   By: user42 <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/03 22:46:06 by user42            #+#    #+#             */
-/*   Updated: 2021/10/03 23:42:57 by user42           ###   ########.fr       */
+/*   Updated: 2021/10/04 00:32:21 by user42           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
 
-int	mutex_fork(int lock, t_phil *phil, int i)
+void	mutex_fork(int lock, t_phil *phil, int i)
 {
 	if (lock)
 	{
@@ -21,10 +21,9 @@ int	mutex_fork(int lock, t_phil *phil, int i)
 	}
 	else
 		pthread_mutex_unlock(&phil->info->fork[i]);
-	return (0);
 }
 
-int	take_drop_fork(int take, t_phil *phil)
+void	take_drop_fork(int take, t_phil *phil)
 {
 	int	i;
 
@@ -34,7 +33,6 @@ int	take_drop_fork(int take, t_phil *phil)
 		mutex_fork(take, phil, i + 1);
 	else
 		mutex_fork(take, phil, 0);
-	return (0);
 }
 
 void	eat(t_phil *phil)
